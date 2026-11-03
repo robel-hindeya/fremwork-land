@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 
-/** OAuth (Google, Microsoft, Apple) and password-reset links land here with a PKCE `code`. */
+/** OAuth (Google) and password-reset links land here with a PKCE `code`. */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');

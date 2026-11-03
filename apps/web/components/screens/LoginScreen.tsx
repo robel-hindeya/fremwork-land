@@ -153,10 +153,8 @@ export function LoginScreen() {
       </button>
       </form>
       <div aria-hidden="true" style={{ display: "flex", alignItems: "center", gap: "12px", margin: "26px 0 16px", fontSize: "12px", color: "#A3A3A0" }}><span style={{ flex: "1", height: "1px", background: "#EDEDED" }}></span>or continue with<span style={{ flex: "1", height: "1px", background: "#EDEDED" }}></span></div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "10px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "10px" }}>
       <button type="button" className="sso" onClick={v.onSso('google')} style={{ fontFamily: "inherit", fontSize: "13px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "10px 6px", cursor: "pointer" }}>Google</button>
-      <button type="button" className="sso" onClick={v.onSso('azure')} style={{ fontFamily: "inherit", fontSize: "13px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "10px 6px", cursor: "pointer" }}>Microsoft</button>
-      <button type="button" className="sso" onClick={v.onSso('apple')} style={{ fontFamily: "inherit", fontSize: "13px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "10px 6px", cursor: "pointer" }}>Apple</button>
       </div>
       {v.notice ? (<>
       <p className="fade" role="status" style={{ margin: "16px 0 0", fontSize: "13px", lineHeight: "20px", color: "#5E5E5E", background: "#F4F4F2", borderRadius: "6px", padding: "10px 12px" }}>{v.notice}</p>

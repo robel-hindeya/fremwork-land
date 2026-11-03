@@ -7,7 +7,7 @@ The Fremwork website, waitlist, events and admin, built from the Fremwork design
 | Frontend | Next.js 15 (App Router, React 19) | `apps/web` |
 | Backend | NestJS 11 REST API | `apps/api` |
 | Database | Supabase Postgres, with migrations, RLS and seed data | `supabase/` |
-| Auth | Supabase Auth: email + password, Google, Microsoft, Apple, invite links | web + API |
+| Auth | Supabase Auth: email + password, Google, invite links | web + API |
 
 ## Screens
 
@@ -74,7 +74,7 @@ From then on, invite teammates from Admin › Settings › Team. Invite emails s
 - **Auth settings** (Dashboard → Authentication):
   - URL configuration: set Site URL to your web domain and add `https://<domain>/auth/callback` and `https://<domain>/auth/confirm` to the redirect URLs.
   - Email templates: paste `supabase/templates/invite.html` into "Invite user" and `recovery.html` into "Reset password". Invite links need these to sign people in.
-  - Providers: turn on Google, Azure (Microsoft) and Apple and add their client IDs. Locally, set them in `supabase/config.toml`.
+  - Providers: turn on Google and add its client ID. Locally, set them in `supabase/config.toml`.
 - **API on Vercel** (a second Vercel project from the same repo):
   1. Vercel → Add New → Project → import `fremwork.com` again. Set **Root Directory** to `apps/api`. Vercel detects NestJS.
   2. Environment variables: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `WEB_URL` = your site's URL(s), e.g. `https://fremwork.com,https://fremwork-com.vercel.app`. Optional: `ALLOW_VERCEL_PREVIEWS=true`.
