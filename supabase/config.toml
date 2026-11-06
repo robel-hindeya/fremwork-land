@@ -29,6 +29,10 @@ enable_signup = true
 enable_signup = true
 enable_confirmations = true
 
+[auth.email.template.confirmation]
+subject = "Confirm your Fremwork email"
+content_path = "./supabase/templates/confirmation.html"
+
 [auth.email.template.invite]
 subject = "Your Fremwork invite"
 content_path = "./supabase/templates/invite.html"

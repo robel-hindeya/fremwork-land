@@ -3,6 +3,7 @@
 import { Fragment } from 'react';
 import { identifyVisitor } from '@/components/VisitTracker';
 import Link from 'next/link';
+import { APP_LOGIN_URL } from '@/lib/app-url';
 import { FramSvg, type FramFace } from '@/components/fram/FramSvg';
 import '@/styles/events.css';
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
@@ -233,8 +234,8 @@ export function EventsScreen({ initialEvents, settings }: { initialEvents: Publi
       <Link href="/events" className="navi" aria-current="page" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minWidth: "84px", padding: "8px 12px 10px", textDecoration: "none", fontSize: "13px", fontWeight: "600", color: "#0A0A0A" }}><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style={{ display: "block" }}><path d="M4.5 6 H19.5 V20 H4.5 Z M4.5 10.5 H19.5 M8.5 3.5 V7.5 M15.5 3.5 V7.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path></svg><span>Events</span><span aria-hidden="true" style={{ position: "absolute", bottom: "2px", left: "50%", width: "4px", height: "4px", marginLeft: "-2px", borderRadius: "50%", background: "#0A0A0A", opacity: "1" }}></span></Link>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-      <Link href="/login" className="navi desk-login" style={{ color: "#5E5E5E", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "12px 16px" }}>Log in</Link>
-      <Link href="/waitlist" className="desk-cta" style={{ background: "#0A0A0A", color: "#FFFFFF", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "14px 22px", borderRadius: "999px", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)", whiteSpace: "nowrap" }}>Join the waitlist</Link>
+      <Link href={APP_LOGIN_URL} className="navi desk-login" style={{ color: "#5E5E5E", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "12px 16px" }}>Log in</Link>
+      <Link href="/signup" className="desk-cta" style={{ background: "#0A0A0A", color: "#FFFFFF", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "14px 22px", borderRadius: "999px", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)", whiteSpace: "nowrap" }}>Sign Up</Link>
       </div>
       </nav>
       </header>
@@ -394,8 +395,8 @@ export function EventsScreen({ initialEvents, settings }: { initialEvents: Publi
       <nav className="tabbar" aria-label="Main">
       <Link href="/" className="tb"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 L12 4 L20.5 11 M5.5 9.5 V20 H18.5 V9.5 M10 20 V14.5 H14 V20" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Home</span></Link>
       <Link href="/events" className="tb" aria-current="page"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6 H19.5 V20 H4.5 Z M4.5 10.5 H19.5 M8.5 3.5 V7.5 M15.5 3.5 V7.5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Events</span></Link>
-      <Link href="/waitlist" className="tb tb-join"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6 V18 M6 12 H18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Join</span></Link>
-      <Link href="/login" className="tb"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4.5 20.5a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Log in</span></Link>
+      <Link href="/signup" className="tb tb-join"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6 V18 M6 12 H18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Sign Up</span></Link>
+      <Link href={APP_LOGIN_URL} className="tb"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4.5 20.5a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Log in</span></Link>
       </nav>
       </div>
       </div>

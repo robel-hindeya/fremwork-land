@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react';
 import Link from 'next/link';
+import { APP_LOGIN_URL } from '@/lib/app-url';
 import { FramSvg, type FramFace } from '@/components/fram/FramSvg';
 import '@/styles/home.css';
 import { useEffect, useMemo, useRef, type ChangeEvent, type FormEvent, type MouseEvent } from 'react';
@@ -236,8 +237,8 @@ export function HomeScreen() {
       <Link href="/events" className="navi" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minWidth: "84px", padding: "8px 12px 10px", textDecoration: "none", fontSize: "13px", fontWeight: "500", color: "#8C8C8C" }}><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style={{ display: "block" }}><path d="M4.5 6 H19.5 V20 H4.5 Z M4.5 10.5 H19.5 M8.5 3.5 V7.5 M15.5 3.5 V7.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path></svg><span>Events</span><span aria-hidden="true" style={{ position: "absolute", bottom: "2px", left: "50%", width: "4px", height: "4px", marginLeft: "-2px", borderRadius: "50%", background: "#0A0A0A", opacity: "0" }}></span></Link>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-      <Link href="/login" className="navi desk-login" style={{ color: "#5E5E5E", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "12px 16px" }}>Log in</Link>
-      <Link href="/waitlist" className="desk-cta" style={{ background: "#0A0A0A", color: "#FFFFFF", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "14px 22px", borderRadius: "999px", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)", whiteSpace: "nowrap" }}>Join the waitlist</Link>
+      <Link href={APP_LOGIN_URL} className="navi desk-login" style={{ color: "#5E5E5E", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "12px 16px" }}>Log in</Link>
+      <Link href="/signup" className="desk-cta" style={{ background: "#0A0A0A", color: "#FFFFFF", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "14px 22px", borderRadius: "999px", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)", whiteSpace: "nowrap" }}>Sign Up</Link>
       </div>
       </nav>
       </header>
@@ -332,15 +333,15 @@ export function HomeScreen() {
       </div>
       </div>
       </section>
-      {/* JOIN CTA (top) */}
+      {/* SIGN UP CTA (top) */}
       <section aria-labelledby="cta-title-top" style={{ padding: "24px 16px 24px" }}>
       <div style={{ position: "relative", maxWidth: "1180px", margin: "0 auto", overflow: "hidden", borderRadius: "24px", background: "#F1F1EC", border: "1px solid #E6E6E3", padding: "clamp(48px, 6vw, 80px) clamp(20px, 4vw, 56px)" }}>
       <div aria-hidden="true" className="pglow" style={{ position: "absolute", left: "12%", top: "8%", width: "76%", height: "110%", borderRadius: "50%", background: "radial-gradient(closest-side, rgba(198,244,50,0.75), rgba(198,244,50,0.25) 55%, rgba(198,244,50,0) 100%)", filter: "blur(34px)" }}></div>
       <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", textAlign: "center" }}>
       <h2 id="cta-title-top" style={{ margin: "0", fontSize: "clamp(30px, 3.6vw, 48px)", lineHeight: "1.1", letterSpacing: "-0.035em", fontWeight: "600" }}>Put a finance team in your chat.</h2>
-      <p style={{ margin: "0", fontSize: "16px", lineHeight: "24px", color: "#3A3A38" }}>We are letting businesses in a few at a time.</p>
+      <p style={{ margin: "0", fontSize: "16px", lineHeight: "24px", color: "#3A3A38" }}>Create your account and start asking in minutes.</p>
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px", marginTop: "18px" }}>
-      <Link href="/waitlist" className="cta-dark" style={{ textDecoration: "none", fontSize: "15px", fontWeight: "500", color: "#FFFFFF", background: "#0A0A0A", borderRadius: "999px", padding: "14px 24px" }}>Join the waitlist</Link>
+      <Link href="/signup" className="cta-dark" style={{ textDecoration: "none", fontSize: "15px", fontWeight: "500", color: "#FFFFFF", background: "#0A0A0A", borderRadius: "999px", padding: "14px 24px" }}>Sign Up</Link>
       <Link href="/events" className="cta-light" style={{ textDecoration: "none", fontSize: "15px", fontWeight: "500", color: "#0A0A0A", background: "#FFFFFF", border: "1px solid #E2E2DF", borderRadius: "999px", padding: "13px 24px" }}>Events</Link>
       </div>
       </div>
@@ -377,7 +378,7 @@ export function HomeScreen() {
       <span style={{ display: "flex", gap: "10px", fontSize: "15px", lineHeight: "22px" }}><span aria-hidden="true" style={{ color: "#127A4D", fontWeight: "700" }}>✓</span>{pt.text}</span>
       </Fragment>))}
       </div>
-      <Link href="/waitlist" className="mall" style={{ alignSelf: "flex-start", marginTop: "8px", fontSize: "14px", fontWeight: "600" }}>Get early access →</Link>
+      <Link href="/signup" className="mall" style={{ alignSelf: "flex-start", marginTop: "8px", fontSize: "14px", fontWeight: "600" }}>Sign Up →</Link>
       </div>
       <div aria-hidden="true" style={{ flex: "1 1 420px", minWidth: "0", background: "#FFFFFF", border: "1px solid #E6E6E3", borderRadius: "20px", padding: "22px", boxSizing: "border-box", minHeight: "320px", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: "10px", boxShadow: "0 18px 44px rgba(10,10,10,0.06)" }}>
       <span style={{ alignSelf: "flex-start", marginBottom: "auto", fontFamily: "'Geist Mono', monospace", fontSize: "11px", letterSpacing: "0.08em", fontWeight: "500", color: "#8C8C8C" }}>ASK FREMWORK</span>
@@ -389,15 +390,15 @@ export function HomeScreen() {
       </section>
       </Fragment>))}
       <div style={{ height: "64px" }}></div>
-      {/* JOIN CTA */}
+      {/* SIGN UP CTA */}
       <section aria-labelledby="cta-title" style={{ padding: "72px 16px 104px" }}>
       <div style={{ position: "relative", maxWidth: "1180px", margin: "0 auto", overflow: "hidden", borderRadius: "24px", background: "#F1F1EC", border: "1px solid #E6E6E3", padding: "clamp(48px, 6vw, 80px) clamp(20px, 4vw, 56px)" }}>
       <div aria-hidden="true" className="pglow" style={{ position: "absolute", left: "12%", top: "8%", width: "76%", height: "110%", borderRadius: "50%", background: "radial-gradient(closest-side, rgba(198,244,50,0.75), rgba(198,244,50,0.25) 55%, rgba(198,244,50,0) 100%)", filter: "blur(34px)" }}></div>
       <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", textAlign: "center" }}>
       <h2 id="cta-title" style={{ margin: "0", fontSize: "clamp(30px, 3.6vw, 48px)", lineHeight: "1.1", letterSpacing: "-0.035em", fontWeight: "600" }}>Put a finance team in your chat.</h2>
-      <p style={{ margin: "0", fontSize: "16px", lineHeight: "24px", color: "#3A3A38" }}>We are letting businesses in a few at a time.</p>
+      <p style={{ margin: "0", fontSize: "16px", lineHeight: "24px", color: "#3A3A38" }}>Create your account and start asking in minutes.</p>
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px", marginTop: "18px" }}>
-      <Link href="/waitlist" className="cta-dark" style={{ textDecoration: "none", fontSize: "15px", fontWeight: "500", color: "#FFFFFF", background: "#0A0A0A", borderRadius: "999px", padding: "14px 24px" }}>Join the waitlist</Link>
+      <Link href="/signup" className="cta-dark" style={{ textDecoration: "none", fontSize: "15px", fontWeight: "500", color: "#FFFFFF", background: "#0A0A0A", borderRadius: "999px", padding: "14px 24px" }}>Sign Up</Link>
       <Link href="/events" className="cta-light" style={{ textDecoration: "none", fontSize: "15px", fontWeight: "500", color: "#0A0A0A", background: "#FFFFFF", border: "1px solid #E2E2DF", borderRadius: "999px", padding: "13px 24px" }}>Events</Link>
       </div>
       </div>
@@ -419,8 +420,8 @@ export function HomeScreen() {
       <nav className="tabbar" aria-label="Main">
       <Link href="/" className="tb" aria-current="page"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 L12 4 L20.5 11 M5.5 9.5 V20 H18.5 V9.5 M10 20 V14.5 H14 V20" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Home</span></Link>
       <Link href="/events" className="tb"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6 H19.5 V20 H4.5 Z M4.5 10.5 H19.5 M8.5 3.5 V7.5 M15.5 3.5 V7.5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Events</span></Link>
-      <Link href="/waitlist" className="tb tb-join"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6 V18 M6 12 H18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Join</span></Link>
-      <Link href="/login" className="tb"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4.5 20.5a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Log in</span></Link>
+      <Link href="/signup" className="tb tb-join"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6 V18 M6 12 H18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Sign Up</span></Link>
+      <Link href={APP_LOGIN_URL} className="tb"><span className="tb-ic"><svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4.5 20.5a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span>Log in</span></Link>
       </nav>
       </div>
       </div>

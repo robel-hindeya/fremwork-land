@@ -50,13 +50,7 @@ export function LoginScreen() {
     if (error) {
       return set({ loading: false, passErr: error.message === 'Invalid login credentials' ? 'That email and password do not match.' : error.message });
     }
-    const next = nextParam();
-    if (next) {
-      router.replace(next);
-      router.refresh();
-      return;
-    }
-    set({ loading: false, done: true });
+    router.replace(nextParam() ?? '/open-app');
     router.refresh();
   };
 
@@ -69,7 +63,7 @@ export function LoginScreen() {
   };
 
   const onSso = (provider: Provider) => async () => {
-    const next = nextParam() ?? '/admin';
+    const next = nextParam() ?? '/open-app';
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent(next)}` },
@@ -152,14 +146,14 @@ export function LoginScreen() {
       {v.submitLabel}
       </button>
       </form>
-      <div aria-hidden="true" style={{ display: "flex", alignItems: "center", gap: "12px", margin: "26px 0 16px", fontSize: "12px", color: "#A3A3A0" }}><span style={{ flex: "1", height: "1px", background: "#EDEDED" }}></span>or continue with<span style={{ flex: "1", height: "1px", background: "#EDEDED" }}></span></div>
+      <div aria-hidden="true" style={{ display: "flex", alignItems: "center", gap: "12px", margin: "26px 0 16px", fontSize: "12px", color: "#A3A3A0" }}><span style={{ flex: "1", height: "1px", background: "#EDEDED" }}></span>or<span style={{ flex: "1", height: "1px", background: "#EDEDED" }}></span></div>
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "10px" }}>
-      <button type="button" className="sso" onClick={v.onSso('google')} style={{ fontFamily: "inherit", fontSize: "13px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "10px 6px", cursor: "pointer" }}>Google</button>
+      <button type="button" className="sso" onClick={v.onSso('google')} style={{ fontFamily: "inherit", fontSize: "13px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "11px 6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}><svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true" style={{ flex: "none" }}><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.4 13.7 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.2 5.6c4.2-3.9 7.1-9.6 7.1-17.1z"></path><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.2C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.2z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.2-5.6c-2.2 1.5-5 2.4-8.7 2.4-6.3 0-11.6-4.2-13.5-10l-7.9 6.2C6.5 42.6 14.6 48 24 48z"></path></svg>Continue with Google</button>
       </div>
       {v.notice ? (<>
       <p className="fade" role="status" style={{ margin: "16px 0 0", fontSize: "13px", lineHeight: "20px", color: "#5E5E5E", background: "#F4F4F2", borderRadius: "6px", padding: "10px 12px" }}>{v.notice}</p>
       </>) : null}
-      <p style={{ margin: "26px 0 0", textAlign: "center", fontSize: "13px", color: "#8C8C8C" }}>Don’t have an account? <Link href="/waitlist" className="accent-lnk">Join the waitlist</Link></p>
+      <p style={{ margin: "26px 0 0", textAlign: "center", fontSize: "13px", color: "#8C8C8C" }}>Don’t have an account? <Link href="/signup" className="accent-lnk">Sign up</Link></p>
       </div>
       </>) : null}
       {v.done ? (<>
@@ -168,7 +162,8 @@ export function LoginScreen() {
       <h1 style={{ margin: "18px 0 0", fontSize: "30px", lineHeight: "1.15", letterSpacing: "-0.03em", fontWeight: "600" }}>You are in.</h1>
       <p style={{ margin: "10px 0 0", fontSize: "14px", lineHeight: "22px", color: "#8C8C8C" }}>Signed in as <strong style={{ color: "#0A0A0A", fontWeight: "600" }}>{v.email}</strong>. Your assistants are ready when you are.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "26px" }}>
-      <Link href="/admin" className="btn-dark" style={{ textDecoration: "none", fontSize: "14px", fontWeight: "500", color: "#FFFFFF", background: "#0A0A0A", borderRadius: "6px", padding: "12px 20px" }}>Open admin</Link>
+      <Link href="/open-app" className="btn-dark" style={{ textDecoration: "none", fontSize: "14px", fontWeight: "500", color: "#FFFFFF", background: "#0A0A0A", borderRadius: "6px", padding: "12px 20px" }}>Open Fremwork AI</Link>
+      <Link href="/admin" className="sso" style={{ textDecoration: "none", fontSize: "14px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "11px 20px" }}>Open admin</Link>
       <Link href="/" className="sso" style={{ textDecoration: "none", fontSize: "14px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "11px 20px" }}>Back to home</Link>
       <Link href="/set-password" className="sso" style={{ textDecoration: "none", fontSize: "14px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "11px 20px" }}>Change password</Link>
       <button type="button" className="sso" onClick={v.onReset} style={{ fontFamily: "inherit", fontSize: "14px", fontWeight: "500", color: "#0A0A0A", background: "#FAFAF8", border: "1px solid #EDEDED", borderRadius: "6px", padding: "11px 20px", cursor: "pointer" }}>Log out</button>

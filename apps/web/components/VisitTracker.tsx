@@ -19,7 +19,7 @@ function browserId(): string {
   return id;
 }
 
-/** Puts a name on this browser's visitor after a waitlist sign-up or event registration. */
+/** Puts a name on this browser's visitor after a sign-up or event registration. */
 export function identifyVisitor(email: string) {
   try {
     getSupabaseBrowserClient()
