@@ -12,7 +12,9 @@ export async function bootstrapServer(): Promise<Express> {
     return cachedServer;
   }
   const expressApp = express();
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+  expressApp.use(express.json({ limit: '1mb' }));
+  expressApp.use(express.urlencoded({ extended: true, limit: '1mb' }));
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), { bodyParser: false });
 
   // WEB_URL is a comma-separated list of sites allowed to call the API, e.g.
   // "https://fremwork.com,https://fremwork-web.vercel.app". Set ALLOW_VERCEL_PREVIEWS=true

@@ -12,7 +12,7 @@ export class ApiError extends Error {
   }
 }
 
-type Options = Omit<RequestInit, 'body'> & { body?: unknown; auth?: boolean };
+type Options = Omit<RequestInit, 'body'> & { body?: unknown; auth?: boolean; fallback?: boolean };
 
 /**
  * Calls the NestJS API. With `auth: true` the current Supabase access token is sent
@@ -20,12 +20,13 @@ type Options = Omit<RequestInit, 'body'> & { body?: unknown; auth?: boolean };
  */
 export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   const method = (opts.method || 'GET').toUpperCase();
+  if (API_DISABLED && opts.fallback === false) throw new ApiError(503, 'Email sending needs the website API. Configure NEXT_PUBLIC_API_URL and the email service.');
   if (API_DISABLED) return direct<T>(method, path, opts.body);
   try {
     return await viaApi<T>(path, opts);
   } catch (err) {
     // API down, unreachable or misconfigured: serve the same request from Supabase.
-    if (err instanceof ApiError && (err.status === 0 || err.status >= 500)) {
+    if (opts.fallback !== false && err instanceof ApiError && (err.status === 0 || err.status >= 500)) {
       console.warn(`Fremwork API failed (${err.status}) for ${method} ${path}; using Supabase directly.`);
       return direct<T>(method, path, opts.body);
     }
@@ -33,7 +34,7 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   }
 }
 
-async function viaApi<T>(path: string, { body, auth, headers, ...init }: Options = {}): Promise<T> {
+async function viaApi<T>(path: string, { body, auth, fallback: _fallback, headers, ...init }: Options = {}): Promise<T> {
   const h = new Headers(headers);
   if (body !== undefined) h.set('Content-Type', 'application/json');
   if (auth) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminEmailComposer } from '@/components/AdminEmailComposer';
 import { Fragment } from 'react';
 import Link from 'next/link';
 import '@/styles/admin.css';
@@ -142,6 +143,7 @@ function editForm(e: AdminEvent): Record<string, string> {
 export function AdminScreen() {
   const router = useRouter();
   const [s, set, get] = useMergeState({
+    emailOpen: false, emailRecipients: [] as string[],
     tab: 'overview' as Tab, q: '', wlFilter: 'All', sel: {} as Record<number, boolean>, regEv: 'all',
     me: null as Me | null, denied: false, loading: true,
     wl: [] as WlEntry[], events: [] as AdminEvent[], regs: [] as Reg[], overview: { weeks: [], activity: [] } as Overview,
@@ -586,7 +588,9 @@ export function AdminScreen() {
       <h1 style={{ margin: "0", fontSize: "34px", fontWeight: "600", letterSpacing: "-0.03em", lineHeight: "1.1" }}>{v.title}</h1>
       <p style={{ margin: "8px 0 0", fontSize: "15px", color: "#5E5E5E" }}>{v.subtitle}</p>
       </div>
+      <AdminEmailComposer open={s.emailOpen} initialEmails={s.emailRecipients} onClose={() => set({ emailOpen: false })} />
       <div className="head-actions" style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+      <button type="button" className="btn btn-line" onClick={() => set({ emailOpen: true, emailRecipients: [] })}>Email users</button>
       {v.showSearch ? (<>
       <label className="search"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="#5E5E5E" strokeWidth="1.6"></circle><path d="M10.5 10.5 L14 14" stroke="#5E5E5E" strokeWidth="1.6" strokeLinecap="round"></path></svg><input type="search" placeholder={v.searchPh} aria-label={v.searchPh} value={v.q} onChange={v.onQ} /></label>
       </>) : null}
@@ -672,6 +676,7 @@ export function AdminScreen() {
       <div className="card" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px 10px 18px", marginBottom: "12px", background: "#0A0A0A", borderColor: "#0A0A0A", color: "#FFFFFF", flexWrap: "wrap" }}>
       <span style={{ fontSize: "14px", flex: "1" }}>{v.selCount} selected</span>
       <button type="button" className="btn btn-sm" onClick={v.onClearSel} style={{ background: "transparent", color: "#FFFFFF", border: "1px solid #3A3A3A" }}>Clear</button>
+      <button type="button" className="btn btn-sm" onClick={() => set({ emailOpen: true, emailRecipients: s.wl.filter((person) => s.sel[person.id]).map((person) => person.email) })}>Email selected</button>
       <button type="button" className="btn btn-sm" onClick={v.onInviteSel} style={{ background: "#C6F432", color: "#0A0A0A", border: "1px solid #C6F432" }}>Send invites</button>
       </div>
       </>) : null}
@@ -691,7 +696,7 @@ export function AdminScreen() {
       <span className="c-role ell" style={{ color: "#5E5E5E" }}>{r.role}</span>
       <span className="c-date" style={{ color: "#5E5E5E", fontSize: "13px" }}>{r.joined}</span>
       <span><span className="pill" style={{ background: r.stBg, color: r.stColor }}><span className="dot" style={{ background: r.stDot }}></span>{r.status}</span></span>
-      <span className="c-act" style={{ textAlign: "right" }}><button type="button" className="btn btn-line btn-sm" onClick={r.act}>{r.actLabel}</button></span>
+      <span className="c-act" style={{ textAlign: "right" }}><button type="button" className="btn btn-line btn-sm" onClick={() => set({ emailOpen: true, emailRecipients: [r.email] })}>Email</button> <button type="button" className="btn btn-line btn-sm" onClick={r.act}>{r.actLabel}</button></span>
       </div>
       </Fragment>))}
       {v.wlEmpty ? (<>

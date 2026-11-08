@@ -33,6 +33,24 @@ export class EmailService {
     );
   }
 
+  get configured(): boolean { return Boolean(this.getApiKey()); }
+
+  /** One message per address: recipients never see each other's email addresses. */
+  async sendBatch(messages: { to: string; subject: string; html?: string; text?: string }[], key: string): Promise<void> {
+    if (!this.configured) throw new Error('email_not_configured');
+    const response = await fetch('https://api.resend.com/emails/batch', {
+      method: 'POST',
+      signal: AbortSignal.timeout(12000),
+      headers: { Authorization: `Bearer ${this.getApiKey()}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
+      body: JSON.stringify(messages.map((message) => ({ ...message, from: this.getFromEmail(), to: [message.to] }))),
+    });
+    if (!response.ok) throw new Error(`provider_${response.status}`);
+    const result = await response.json() as { data?: { id: string }[] };
+    if (!Array.isArray(result.data) || result.data.length !== messages.length || result.data.some((item) => !item.id)) {
+      throw new Error('provider_unconfirmed');
+    }
+  }
+
   private loadTemplate(): string {
     if (this.templateCache) return this.templateCache;
 

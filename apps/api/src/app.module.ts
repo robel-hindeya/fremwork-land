@@ -11,6 +11,7 @@ import { SettingsModule } from './settings/settings.module';
 import { TeamModule } from './team/team.module';
 import { OverviewModule } from './overview/overview.module';
 import { VisitorsModule } from './visitors/visitors.module';
+import { AdminEmailModule } from './email/admin-email.module';
 import { EmailModule } from './email/email.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { EmailModule } from './email/email.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }]),
     SupabaseModule,
     EmailModule,
+    AdminEmailModule,
     SettingsModule,
     WaitlistModule,
     EventsModule,
