@@ -14,7 +14,7 @@ import { EMAIL_RE } from '@/lib/format';
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 const nextParam = () => {
   const n = new URLSearchParams(window.location.search).get('next');
-  return n && n.startsWith('/') && !n.startsWith('//') ? n : null;
+  return n && ['/open-app', '/admin', '/set-password'].includes(n) ? n : null;
 };
 
 /** Log in · ported from Login.dc.html, backed by Supabase Auth. */

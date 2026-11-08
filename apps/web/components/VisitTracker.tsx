@@ -35,7 +35,7 @@ export function identifyVisitor(email: string) {
 export function VisitTracker() {
   const path = usePathname();
   useEffect(() => {
-    if (!path || path.startsWith('/admin') || navigator.webdriver) return;
+    if (!path || path.startsWith('/admin') || path.startsWith('/auth/') || path === '/open-app' || navigator.webdriver) return;
     const t = window.setTimeout(() => {
       const referrer = document.referrer && !document.referrer.startsWith(location.origin) ? document.referrer : null;
       const cookie = document.cookie.match(/(?:^|; )fw_geo=([^;]*)/)?.[1];

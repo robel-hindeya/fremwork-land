@@ -1,43 +1,48 @@
-'use client';
+ 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { SUPABASE_URL } from '@/lib/supabase/config';
 import { APP_URL } from '@/lib/app-url';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
-/**
- * Hands the signed-in session to Fremwork AI. The app is on another domain, so cookies can't be
- * shared: the tokens go in the URL hash (never sent to a server) to the app's /auth/callback.
- *
- * Supabase rotates refresh tokens and revokes the session if an old one is reused, so only one
- * site may hold it. This site forgets its copy locally. signOut() would end the session for both.
- */
+/** Move the session in a POST body, never in a URL, history entry, or referrer. */
 export default function OpenAppPage() {
   const started = useRef(false);
-
+  const [error, setError] = useState('');
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-
-    getSupabaseBrowserClient().auth.getSession().then(({ data: { session } }) => {
+    const supabase = getSupabaseBrowserClient();
+    void (async () => {
+      const target = new URL('/api/auth/session', APP_URL);
+      if (target.protocol !== 'https:' && !(target.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(target.hostname))) {
+        throw new Error('The workspace URL is not configured securely.');
+      }
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return window.location.replace('/login');
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) return window.location.replace('/login');
-
-      const expiresIn = session.expires_at ? session.expires_at - Math.floor(Date.now() / 1000) : session.expires_in;
-      const hash = new URLSearchParams({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-        expires_in: String(expiresIn),
-      });
-
-      document.cookie.split('; ').map((c) => c.split('=')[0]).filter((name) => name.startsWith('sb-'))
+      supabase.auth.stopAutoRefresh();
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = target.href;
+      for (const [name, value] of Object.entries({ access_token: session.access_token, refresh_token: session.refresh_token })) {
+        const input = document.createElement('input');
+        input.type = 'hidden'; input.name = name; input.value = value;
+        form.appendChild(input);
+      }
+      document.body.appendChild(form);
+      // Forget this site's copy without revoking the session being transferred.
+      // Restrict deletion to this project's cookies, including SSR chunk suffixes.
+      const cookiePrefix = `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
+      document.cookie.split('; ').map((c) => c.split('=')[0])
+        .filter((name) => name === cookiePrefix || name.startsWith(cookiePrefix + '.'))
         .forEach((name) => { document.cookie = `${name}=; Max-Age=0; path=/`; });
-
-      window.location.replace(`${APP_URL}/auth/callback#${hash}`);
-    });
+      form.submit();
+    })().catch(() => setError('We could not open your workspace. Please log in again.'));
   }, []);
-
-  return (
-    <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', fontFamily: "'Geist', system-ui, sans-serif", color: '#5E5E5E', fontSize: '14px' }}>
-      <p role="status">Opening Fremwork AI…</p>
-    </div>
-  );
+  return <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', fontFamily: "'Geist', system-ui, sans-serif" }}>
+    {error ? <p role="alert">{error} <Link href="/login">Log in</Link></p> : <p role="status">Opening Fremwork AI…</p>}
+  </div>;
 }

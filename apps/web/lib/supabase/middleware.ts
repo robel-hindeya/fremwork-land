@@ -38,6 +38,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (user && (path === '/admin' || path.startsWith('/admin/'))) {
+    const { data: profile, error } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    if (error || !profile || !['owner', 'admin'].includes(profile.role)) {
+      const redirected = NextResponse.redirect(new URL('/open-app', request.url));
+      response.cookies.getAll().forEach((cookie) => redirected.cookies.set(cookie));
+      return redirected;
+    }
+  }
+
   // City and region from Vercel's IP lookup, for Admin › Visitors (country is taken server-side).
   const geo = ['country', 'country-region', 'city'].map((k) => request.headers.get(`x-vercel-ip-${k}`) || '');
   if (geo.some(Boolean)) {

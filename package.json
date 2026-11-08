@@ -2,7 +2,9 @@
   "name": "fremwork",
   "private": true,
   "packageManager": "pnpm@10.12.1",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "workspaces": [
     "apps/*"
   ],
@@ -14,7 +16,8 @@
     "typecheck": "pnpm -r typecheck",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > apps/api/src/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --local > apps/api/src/supabase/database.types.ts",
+    "test": "node tests/auth.test.cjs"
   },
   "devDependencies": {
     "next": "^15.5.0",

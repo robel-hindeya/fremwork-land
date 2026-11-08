@@ -18,10 +18,10 @@
 <h1 style="margin:0 0 12px;font-size:26px;line-height:1.2;letter-spacing:-0.02em;font-weight:600;">Confirm your email</h1>
 <p style="margin:0 0 28px;font-size:15px;line-height:24px;color:#3A3A38;">Thanks for signing up. Confirm this is your email address and you will go straight to Fremwork AI.</p>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A;border-radius:6px;">
-<a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 24px;font-family:'Geist','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:500;color:#FFFFFF;text-decoration:none;">Confirm email</a>
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/open-app" style="display:inline-block;padding:13px 24px;font-family:'Geist','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:500;color:#FFFFFF;text-decoration:none;">Confirm email</a>
 </td></tr></table>
 <p style="margin:28px 0 6px;font-size:13px;line-height:20px;color:#5E5E5E;">If the button doesn't work, copy this link into your browser:</p>
-<p style="margin:0;font-size:13px;line-height:20px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#3D5AFE;">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;line-height:20px;word-break:break-all;"><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/open-app" style="color:#3D5AFE;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/open-app</a></p>
 </td></tr>
 <tr><td style="padding:18px 32px 26px;border-top:1px solid #EDEDED;font-family:'Geist','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8C8C8C;">If you didn't create a Fremwork account, you can ignore this email.<br>Fremwork, your AI finance team in one chat.</td></tr>
 </table>
