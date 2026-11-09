@@ -38,4 +38,3 @@ begin
 end;
 $$;
 revoke execute on function private.send_welcome_email() from public, anon, authenticated;
-
