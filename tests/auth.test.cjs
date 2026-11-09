@@ -28,3 +28,23 @@ test('expired or invalid callback credentials return safely to login', async () 
     assert.match(response.headers.get('location'), /^https:\/\/fremwork.com\/login\?error=/);
   }
 });
+
+test('canonical Supabase settings override stale named project aliases', () => {
+  const names = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_FREMWORK_SUPABASE_URL', 'NEXT_PUBLIC_FREMWORK_SUPABASE_KEY'];
+  const before = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  const modulePath = require.resolve('../apps/web/lib/supabase/config.ts');
+  try {
+    names.forEach((name) => delete process.env[name]); delete require.cache[modulePath];
+    assert.equal(require(modulePath).SUPABASE_URL, 'https://jwznteirgsnebvtswppu.supabase.co');
+    process.env.NEXT_PUBLIC_FREMWORK_SUPABASE_URL = 'https://stale.example';
+    process.env.NEXT_PUBLIC_FREMWORK_SUPABASE_KEY = 'stale-public-test-key';
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://canonical.example';
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'canonical-public-test-key';
+    delete require.cache[modulePath];
+    assert.equal(require(modulePath).SUPABASE_URL, 'https://canonical.example');
+    assert.equal(require(modulePath).SUPABASE_KEY, 'canonical-public-test-key');
+  } finally {
+    for (const [name, value] of Object.entries(before)) if (value === undefined) delete process.env[name]; else process.env[name] = value;
+    delete require.cache[modulePath];
+  }
+});

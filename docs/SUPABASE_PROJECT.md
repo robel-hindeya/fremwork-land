@@ -1,0 +1,13 @@
+# Supabase project replacement — 2026-11-09
+
+Active project: `https://jwznteirgsnebvtswppu.supabase.co` (`jwznteirgsnebvtswppu`). The publishable key is intentionally public. Canonical `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` settings now override legacy named aliases in both websites and the workspace backend, preventing stale named overrides from winning.
+
+Set those two supplied public settings on both Vercel frontend projects, then redeploy. Ensure server-only privileged keys are from this new project. No service-role/secret key was supplied or changed, and the publishable key must not be used as a privileged key.
+
+The current connected Vercel account denied the environment update with HTTP 403 for `sweamtechnology-7854s-projects`; repository changes do not override explicit existing Vercel environment values. Update the Vercel settings manually or authorize the connection for that team before claiming a live switch.
+
+User accounts, profiles/roles, financial records, schemas, and provider settings are not copied by this change. Verify/apply the required migrations in the new project, configure email confirmation and Google OAuth and the correct landing callback URLs, and deploy the welcome/registration Edge Functions with their secrets in this project. Migration `20261109120000_supabase_project_endpoints.sql` replaces the two historical email-trigger destinations without editing migration history. Historical SQL and earlier audit reports retain the old project reference as historical context.
+
+For `edomiyastesfaye321@gmail.com`, provision the confirmed account's UUID-bound role in this project's SQL Editor, not the former project. The prepared one-time `scripts/grant-admin.sql` in the landing checkout preserves an existing owner and repairs a missing profile. Production role provisioning and migration application have not been executed from this environment.
+
+Verification of the supplied public connection: `/auth/v1/settings` returned HTTP 200, email enabled, Google disabled. Zero-row reads of `profiles`, `event_registrations`, `ledger_transactions`, and `admin_email_campaigns` each returned HTTP 404 / `PGRST205` (not in the API schema cache). Apply/verify the shared schema before attempting the admin grant; this replacement alone cannot create a usable profile or ledger. No production schema, auth users, or roles were modified.
