@@ -919,6 +919,10 @@ create index if not exists profiles_email_idx on public.profiles (lower(email));
 -- "admins write events" was FOR ALL, which added a second permissive SELECT policy next to
 -- "anyone reads published events". Admins already read every event through that policy.
 drop policy if exists "admins write events" on public.events;
+-- Safe to run twice (for example when pasted into the SQL Editor again).
+drop policy if exists "admins insert events" on public.events;
+drop policy if exists "admins update events" on public.events;
+drop policy if exists "admins delete events" on public.events;
 create policy "admins insert events" on public.events for insert to authenticated
   with check ((select private.is_admin()));
 create policy "admins update events" on public.events for update to authenticated

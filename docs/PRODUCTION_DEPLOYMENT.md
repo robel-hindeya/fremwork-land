@@ -44,6 +44,14 @@ Apply only the missing files from `supabase/migrations/`, oldest first. Compare 
 
 Then run the `vault.create_secret(... 'project_url' ...)` statement above. All four are additive: they create or replace functions, policies and indexes, and add one table. They delete no rows and drop no tables or columns. Alternative: `supabase db push` after linking.
 
+### B2. Shared with the Fremwork AI workspace
+The workspace repository (`fremwork-work`) uses the same database and adds three migrations:
+`20261107090000_app_ledger.sql`, `20261107091000_invite_role_after_confirmation.sql` and
+`20261108110000_embed_admin_owner.sql`. Apply the files from **both** repositories in timestamp order.
+`20261108110000_embed_admin_owner.sql` grants owner by email; `20261108120000_uuid_role_authorization.sql`
+(in both repositories) replaces those functions, so it must run after it. Never apply the embed file last.
+Verified on a local Supabase stack on 2026-11-10: the combined set applies cleanly and leaves no email-based admin rule.
+
 ### C. Make yourself owner
 After signing up and confirming your email, edit the email in `scripts/grant-admin.sql`, or run:
 ```sql
