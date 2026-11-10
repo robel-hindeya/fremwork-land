@@ -60,7 +60,17 @@ update public.profiles set role = 'owner' where id = (select id from auth.users 
 
 ### D. Auth settings (Dashboard → Authentication)
 - **Sign In / Providers → Email**: keep *Confirm email* ON. The invite role protection depends on it.
-- **URL Configuration**: Site URL = `https://<your-domain>`. Redirect URLs: `https://<your-domain>/auth/callback` and `https://<your-domain>/auth/confirm`.
+- **URL Configuration** (required for Google sign-in; wrong values send people to `http://localhost:3000/?code=…`):
+  - **Site URL**: `https://www.fremwork.com` (never localhost in a production project). Supabase falls back to it when a return URL is not allowed, and email templates build their links from it.
+  - **Redirect URLs**, one per line:
+    ```
+    https://www.fremwork.com/**
+    https://fremwork.com/**
+    https://fremwork-land.onrender.com/**
+    http://localhost:3000/**
+    ```
+  - The site always asks Supabase to return to the domain the visitor is on (`<that domain>/auth/callback`), because the sign-in's PKCE cookie lives there. Every domain people sign in from must be in this list.
+  - Google Cloud Console → OAuth client → Authorized redirect URIs: only `https://<project-ref>.supabase.co/auth/v1/callback`. Google returns to Supabase, never directly to the site.
 - **Emails → Templates**: paste `supabase/templates/confirmation.html`, `invite.html` and `recovery.html`.
 - **Google provider**: enable it and add the client ID/secret if you use Google sign-in. The Google console redirect is `https://<ref>.supabase.co/auth/v1/callback`.
 - **Attack Protection**: turn on *Leaked password protection* if your plan offers it (the Supabase advisor flagged it).

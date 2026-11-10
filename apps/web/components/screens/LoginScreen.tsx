@@ -12,7 +12,9 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { EMAIL_RE } from '@/lib/format';
 import { authMessage, isNetworkError, UNREACHABLE } from '@/lib/auth-errors';
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+// Always return to the domain the visitor is on (www, bare domain, Render, localhost): the PKCE
+// verifier cookie lives there, so a different domain cannot finish the sign-in.
+const siteUrl = () => window.location.origin;
 const nextParam = () => {
   const n = new URLSearchParams(window.location.search).get('next');
   return n && ['/open-app', '/admin', '/set-password'].includes(n) ? n : null;

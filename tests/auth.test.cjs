@@ -14,9 +14,40 @@ test('successful PKCE and email confirmation default to workspace, with safe rec
     for (const [next, expected] of [['', '/open-app'], ['//evil.example', '/open-app'], ['/\\evil.example', '/open-app'], ['/admin', '/admin'], ['/set-password', '/set-password']]) {
       const request = new NextRequest(`https://fremwork.com/auth/callback?${params}&next=${encodeURIComponent(next || '/open-app')}`);
       const response = await handler(request);
-      assert.equal(response.headers.get('location'), `https://fremwork.com${expected}`);
+      // Relative, so the browser stays on whichever public domain it used.
+      assert.equal(response.headers.get('location'), expected);
     }
   }
+});
+
+test('behind a proxy (Render) the internal address never reaches the browser', async () => {
+  server.getSupabaseServerClient = async () => ({ auth: {
+    exchangeCodeForSession: async () => ({ error: null }), verifyOtp: async () => ({ error: { message: 'expired' } }),
+  } });
+  // On Render, request.url is the internal https://localhost:10000 address.
+  const ok = await callback(new NextRequest('https://localhost:10000/auth/callback?code=test-code&next=/open-app', { headers: { host: 'fremwork-land.onrender.com' } }));
+  assert.equal(ok.headers.get('location'), '/open-app');
+  const failed = await confirm(new NextRequest('https://localhost:10000/auth/confirm?token_hash=x&type=email', { headers: { host: 'fremwork-land.onrender.com' } }));
+  assert.match(failed.headers.get('location'), /^\/login\?error=/);
+  for (const r of [ok, failed]) assert.doesNotMatch(r.headers.get('location'), /localhost/);
+});
+
+test('a cancelled Google sign-in returns to login with the provider message and never exchanges a code', async () => {
+  let exchanged = false;
+  server.getSupabaseServerClient = async () => ({ auth: { exchangeCodeForSession: async () => { exchanged = true; return { error: null }; } } });
+  const response = await callback(new NextRequest('https://www.fremwork.com/auth/callback?error=access_denied&error_description=The+user+cancelled'));
+  assert.equal(response.headers.get('location'), `/login?error=${encodeURIComponent('The user cancelled')}`);
+  assert.equal(exchanged, false);
+});
+
+test('a sign-in returned to the site root (Supabase Site URL fallback) is finished at /auth/callback', async () => {
+  const { updateSession } = require('../apps/web/lib/supabase/middleware.ts');
+  const response = await updateSession(new NextRequest('https://www.fremwork.com/?code=test-code'));
+  const location = new URL(response.headers.get('location'));
+  assert.equal(location.origin, 'https://www.fremwork.com');
+  assert.equal(location.pathname, '/auth/callback');
+  assert.equal(location.searchParams.get('code'), 'test-code');
+  assert.equal(location.searchParams.get('next'), '/open-app');
 });
 
 test('expired or invalid callback credentials return safely to login', async () => {
@@ -25,7 +56,7 @@ test('expired or invalid callback credentials return safely to login', async () 
   } });
   for (const handler of [callback, confirm]) {
     const response = await handler(new NextRequest('https://fremwork.com/auth/callback?code=expired&token_hash=expired&type=email'));
-    assert.match(response.headers.get('location'), /^https:\/\/fremwork.com\/login\?error=/);
+    assert.match(response.headers.get('location'), /^\/login\?error=/);
   }
 });
 

@@ -12,7 +12,8 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { EMAIL_RE } from '@/lib/format';
 import { authMessage, isNetworkError, UNREACHABLE } from '@/lib/auth-errors';
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+// Always return to the domain the visitor is on: the PKCE verifier cookie lives there.
+const siteUrl = () => window.location.origin;
 const callback = () => `${siteUrl()}/auth/callback?next=/open-app`;
 const EXISTS = 'An account with that email already exists. Log in instead.';
 

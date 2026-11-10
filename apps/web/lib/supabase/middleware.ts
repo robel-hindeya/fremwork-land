@@ -6,6 +6,16 @@ import { SUPABASE_KEY, SUPABASE_URL } from '@/lib/supabase/config';
 const PROTECTED = ['/admin', '/set-password'];
 
 export async function updateSession(request: NextRequest) {
+  // When a return URL is not in Supabase's Redirect URLs list, Supabase sends the visitor to the
+  // Site URL root with ?code= (or ?error=). Finish the sign-in instead of showing the homepage.
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === '/' && request.method === 'GET' && (searchParams.has('code') || searchParams.has('error_description'))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/callback';
+    if (!url.searchParams.has('next')) url.searchParams.set('next', '/open-app');
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
