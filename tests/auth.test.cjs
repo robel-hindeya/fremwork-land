@@ -79,3 +79,20 @@ test('canonical Supabase settings override stale named project aliases', () => {
     delete require.cache[modulePath];
   }
 });
+
+test('after login each landing site hands users to its own workspace', () => {
+  const modulePath = require.resolve('../apps/web/lib/app-url.ts');
+  const before = process.env.NEXT_PUBLIC_APP_URL;
+  try {
+    delete process.env.NEXT_PUBLIC_APP_URL; delete require.cache[modulePath];
+    const { workspaceUrl } = require(modulePath);
+    assert.equal(workspaceUrl('fremwork-land.onrender.com'), 'https://fremwork-app.onrender.com');
+    assert.equal(workspaceUrl('www.fremwork.com'), 'https://app.fremwork.com');
+    assert.equal(workspaceUrl('fremwork.com'), 'https://app.fremwork.com');
+    process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3999/';
+    assert.equal(workspaceUrl('fremwork-land.onrender.com'), 'http://localhost:3999', 'an explicit setting wins');
+  } finally {
+    if (before === undefined) delete process.env.NEXT_PUBLIC_APP_URL; else process.env.NEXT_PUBLIC_APP_URL = before;
+    delete require.cache[modulePath];
+  }
+});

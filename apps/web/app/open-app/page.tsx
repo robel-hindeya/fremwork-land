@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { SUPABASE_URL } from '@/lib/supabase/config';
-import { APP_URL } from '@/lib/app-url';
+import { workspaceUrl } from '@/lib/app-url';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 /** Move the session in a POST body, never in a URL, history entry, or referrer. */
@@ -15,7 +15,7 @@ export default function OpenAppPage() {
     started.current = true;
     const supabase = getSupabaseBrowserClient();
     void (async () => {
-      const target = new URL('/api/auth/session', APP_URL);
+      const target = new URL('/api/auth/session', workspaceUrl());
       if (target.protocol !== 'https:' && !(target.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(target.hostname))) {
         throw new Error('The workspace URL is not configured securely.');
       }
