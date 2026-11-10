@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 interface Contact { email: string; name: string; sources: string[] }
 interface SendResult { requestId: string; status: string; total: number; accepted: number; uncertain: boolean; message: string }
@@ -23,6 +23,11 @@ export function AdminEmailComposer({ open, initialEmails, onClose }: { open: boo
   const [result, setResult] = useState<SendResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // True only while a send's outcome is unknown (the connection dropped). That send must be
+  // retried or checked, never replaced, so it survives closing and reopening the dialog.
+  const uncertain = useRef(false);
+  const finished = useRef(false);
+  finished.current = result !== null;
 
   useEffect(() => {
     if (!open) return;
@@ -37,6 +42,11 @@ export function AdminEmailComposer({ open, initialEmails, onClose }: { open: boo
     let cancelled = false;
     setLoading(true);
     setError('');
+    if (!uncertain.current) {
+      // A finished, refused or unsent draft must not carry over: the recipients come from the button just clicked.
+      if (finished.current) { setSubject(''); setBody(''); }
+      setSnapshot(null); setSubmitted(false); setResult(null);
+    }
     setSelected(initialEmails.map((email) => email.toLowerCase()));
     setMode(initialEmails.length > 1 ? 'selected' : 'individual');
     api<Contact[]>('/admin/emails/recipients', { auth: true, fallback: false })
@@ -63,15 +73,21 @@ export function AdminEmailComposer({ open, initialEmails, onClose }: { open: boo
     setBusy(true); setSubmitted(true); setError('');
     try {
       setResult(await api<SendResult>('/admin/emails', { method: 'POST', auth: true, fallback: false, body: snapshot }));
+      uncertain.current = false;
     } catch (err) {
-      setError(`${(err as Error).message} If this request reached the server, messages may have been accepted. Check status or retry this same request; do not start another message.`);
+      // The server's own refusals say whether anything was sent. Only a lost connection is uncertain.
+      const unreachable = !(err instanceof ApiError) || err.status === 0;
+      uncertain.current = unreachable;
+      setError(unreachable
+        ? `${(err as Error).message} If this request reached the server, messages may have been accepted. Check status or retry this same request; do not start another message.`
+        : (err as Error).message);
     } finally { setBusy(false); }
   };
 
   const checkStatus = async () => {
     if (!snapshot || busy) return;
     setBusy(true); setError('');
-    try { setResult(await api<SendResult>(`/admin/emails/${snapshot.requestId}`, { auth: true, fallback: false })); }
+    try { setResult(await api<SendResult>(`/admin/emails/${snapshot.requestId}`, { auth: true, fallback: false })); uncertain.current = false; }
     catch (err) { setError((err as Error).message); }
     finally { setBusy(false); }
   };

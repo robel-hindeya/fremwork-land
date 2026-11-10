@@ -1,5 +1,5 @@
 /* Ported from the Fremwork design canvas. Scoped to .pg-admin */
-.pg-admin{margin:0;background:#F4F4F2}
+.pg-admin{margin:0;background:#F4F4F2;overflow-x:clip} /* hidden chart tooltips on edge bars must not widen the page on phones; clip keeps the sticky sidebar working */
 .pg-admin .adm{min-height:100vh;display:grid;grid-template-columns:248px minmax(0,1fr);font-family:'Geist',system-ui,sans-serif;color:#0A0A0A;background:#F4F4F2}
 .pg-admin .side{position:sticky;top:0;height:100vh;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:18px 14px;border-right:1px solid #E4E4E1;background:#F4F4F2}
 .pg-admin .navbtn{display:flex;align-items:center;gap:11px;width:100%;border:0;border-radius:10px;padding:9px 11px;font-family:inherit;font-size:14px;cursor:pointer;text-align:left;transition:background .15s}
