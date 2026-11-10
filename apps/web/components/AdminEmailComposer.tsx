@@ -26,8 +26,10 @@ export function AdminEmailComposer({ open, initialEmails, onClose }: { open: boo
 
   useEffect(() => {
     if (!open) return;
-    dialog.current?.showModal();
-    return () => dialog.current?.close();
+    // Keep the element: by cleanup time the ref may already point to null.
+    const el = dialog.current;
+    el?.showModal();
+    return () => el?.close();
   }, [open]);
 
   useEffect(() => {
