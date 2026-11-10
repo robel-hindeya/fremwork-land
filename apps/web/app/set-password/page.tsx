@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
+import { authMessage } from '@/lib/auth-errors';
 import '@/styles/login.css';
 
 /**
@@ -24,7 +25,7 @@ export default function SetPasswordPage() {
     setLoading(true);
     const { error } = await getSupabaseBrowserClient().auth.updateUser({ password: pw });
     setLoading(false);
-    if (error) return setErr(error.message);
+    if (error) return setErr(authMessage(error));
     router.replace('/admin');
     router.refresh();
   };

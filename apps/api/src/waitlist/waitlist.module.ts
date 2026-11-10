@@ -46,25 +46,25 @@ export class WaitlistService {
     });
     // Already on the list: answer the same way so the form does not reveal who signed up.
     if (error && error.code !== '23505') SupabaseService.check({ data: null, error });
+    // Awaited (in parallel): on Vercel, work left running after the response is sent can be lost.
+    // Email problems never fail the sign-up.
+    const mail: Promise<unknown>[] = [];
     if (!error && s.welcomeEmail) {
-      this.emailService
-        .sendRegistrationEmail({
-          to: dto.email.trim(),
-          name: dto.name.trim(),
-          dates: 'Upcoming',
-          title: 'Fremwork Waitlist',
-        })
-        .catch(() => {});
+      mail.push(this.emailService.sendRegistrationEmail({
+        to: dto.email.trim(),
+        name: dto.name.trim(),
+        dates: 'Upcoming',
+        title: 'Fremwork Waitlist',
+      }));
     }
     if (!error && s.alertInstant && s.notifyEmail) {
-      this.emailService
-        .sendAlertEmail({
-          to: s.notifyEmail,
-          subject: `New waitlist signup: ${dto.name}`,
-          text: `${dto.name} (${dto.email}) joined the waitlist.`,
-        })
-        .catch(() => {});
+      mail.push(this.emailService.sendAlertEmail({
+        to: s.notifyEmail,
+        subject: `New waitlist signup: ${dto.name.trim().replace(/[\r\n]+/g, ' ')}`,
+        text: `${dto.name.trim()} (${dto.email.trim()}) joined the waitlist.`,
+      }));
     }
+    await Promise.allSettled(mail);
     return { ok: true };
   }
 

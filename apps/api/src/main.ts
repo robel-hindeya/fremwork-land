@@ -12,6 +12,9 @@ export async function bootstrapServer(): Promise<Express> {
     return cachedServer;
   }
   const expressApp = express();
+  // Behind Vercel's proxy (one hop): use the client IP from X-Forwarded-For so the rate limit is per visitor,
+  // not one shared bucket for everyone.
+  if (process.env.VERCEL || process.env.TRUST_PROXY === 'true') expressApp.set('trust proxy', 1);
   expressApp.use(express.json({ limit: '1mb' }));
   expressApp.use(express.urlencoded({ extended: true, limit: '1mb' }));
   const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), { bodyParser: false });
@@ -23,7 +26,8 @@ export async function bootstrapServer(): Promise<Express> {
     .split(',')
     .map((o) => o.trim().replace(/\/+$/, ''))
     .filter(Boolean);
-  const previews = process.env.ALLOW_VERCEL_PREVIEWS !== 'false';
+  // Off unless explicitly enabled: anyone can deploy a *.vercel.app site.
+  const previews = process.env.ALLOW_VERCEL_PREVIEWS === 'true';
   app.enableCors({
     origin: (origin: string | undefined, cb: (err: Error | null, ok?: boolean) => void) => {
       if (!origin) return cb(null, true); // curl, server-to-server
@@ -51,6 +55,9 @@ if (typeof require !== 'undefined' && require.main === module) {
         .filter(Boolean);
       console.log(`Fremwork API on port ${port}. Allowed sites: ${allowed.join(', ')}`);
     });
+  }, (err) => {
+    console.error('Fremwork API failed to start:', err);
+    process.exit(1);
   });
 }
 

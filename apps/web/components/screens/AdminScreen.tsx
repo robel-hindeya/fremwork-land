@@ -216,7 +216,9 @@ export function AdminScreen() {
   const selIds = Object.keys(s.sel).filter((k) => s.sel[+k]).map(Number);
 
   const invite = async (ids: number[]) => {
-    const res = await api<{ invited: number; entries: WlEntry[] }>('/admin/waitlist/invite', { method: 'POST', auth: true, body: { ids } });
+    // Invite emails are sent by the API with the service-role key. The direct Supabase fallback can only
+    // flip the status, which would report "Invites sent" when nothing was sent, so it is not used here.
+    const res = await api<{ invited: number; entries: WlEntry[] }>('/admin/waitlist/invite', { method: 'POST', auth: true, fallback: false, body: { ids } });
     const byId = Object.fromEntries(res.entries.map((e) => [e.id, e]));
     set({ wl: get().wl.map((r) => byId[r.id] || r) });
     return res.invited;
@@ -506,7 +508,8 @@ export function AdminScreen() {
       const em = get().inviteEmail.trim();
       if (!EMAIL_RE.test(em)) return set({ inviteErr: 'Enter a valid email address.' });
       try {
-        const m = await api<TeamMember>('/admin/team/invite', { method: 'POST', auth: true, body: { email: em } });
+        // Needs the API: only it can send the Supabase invite email (see waitlist invite above).
+        const m = await api<TeamMember>('/admin/team/invite', { method: 'POST', auth: true, fallback: false, body: { email: em } });
         set({ team: [...get().team.filter((x) => x.email !== m.email), m], inviteEmail: '' });
         flash('Invite sent to ' + em);
       } catch (err) { set({ inviteErr: (err as Error).message }); }

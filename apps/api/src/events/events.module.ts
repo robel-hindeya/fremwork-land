@@ -108,20 +108,36 @@ export class EventsService {
     SupabaseService.check({ data, error });
 
     const dates = ev.whenLabel || (ev.startsAt ? new Date(ev.startsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Upcoming');
-    this.emailService
-      .sendRegistrationEmail({
-        to: dto.email.trim(),
-        name: dto.name.trim(),
-        dates,
-        title: ev.title,
-      })
-      .catch(() => {});
+    // Awaited: on Vercel, work left running after the response is sent can be frozen and lost.
+    await this.sendConfirmation(data!.id, { to: dto.email.trim(), name: dto.name.trim(), dates, title: ev.title });
 
     return { id: data!.id, eventId: data!.event_id, cancelToken: data!.cancel_token };
   }
 
+  /**
+   * The database trigger also asks the registration-email Edge Function to send this confirmation.
+   * Whichever side claims confirmation_sent_at first sends it, so a registrant never gets two.
+   * An email problem never fails the registration.
+   */
+  private async sendConfirmation(regId: number, opts: { to: string; name: string; dates: string; title: string }) {
+    if (!this.emailService.configured) return;
+    try {
+      const claim = await this.db.from('event_registrations')
+        .update({ confirmation_sent_at: new Date().toISOString() })
+        .eq('id', regId).is('confirmation_sent_at', null).select('id');
+      if (!claim.error && !claim.data?.length) return; // already sent by the Edge Function
+      const sent = await this.emailService.sendRegistrationEmail({ ...opts, idempotencyKey: `registration-api-${regId}` });
+      if (!sent && !claim.error) {
+        await this.db.from('event_registrations').update({ confirmation_sent_at: null, confirmation_error: 'api: send failed' }).eq('id', regId);
+      }
+    } catch {
+      /* never block a registration on email */
+    }
+  }
+
   async cancel(id: number, token: string) {
     if (!token) throw new BadRequestException('Missing cancel token.');
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) throw new NotFoundException('Registration not found.');
     const rows = SupabaseService.check(await this.db.from('event_registrations').delete().eq('id', id).eq('cancel_token', token).select('id')) as any[];
     if (!rows.length) throw new NotFoundException('Registration not found.');
     return { ok: true };

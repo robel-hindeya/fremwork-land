@@ -10,6 +10,7 @@ import { useMergeState } from '@/components/fram/useMergeState';
 import { identifyVisitor } from '@/components/VisitTracker';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { EMAIL_RE } from '@/lib/format';
+import { authMessage, isNetworkError, UNREACHABLE } from '@/lib/auth-errors';
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 const callback = () => `${siteUrl()}/auth/callback?next=/open-app`;
@@ -63,7 +64,7 @@ export function SignupScreen() {
     if (error) {
       const taken = error.code === 'user_already_exists';
       const limited = error.status === 429;
-      return set({ loading: false, notice: taken ? EXISTS : limited ? 'Too many sign-ups right now. Wait a while and try again.' : error.message });
+      return set({ loading: false, notice: taken ? EXISTS : limited ? 'Too many sign-ups right now. Wait a while and try again.' : authMessage(error) });
     }
     // With email confirmation on, Supabase hides duplicates by returning a user with no identities.
     if (!data.session && data.user?.identities?.length === 0) return set({ loading: false, notice: EXISTS });
@@ -75,7 +76,7 @@ export function SignupScreen() {
 
   const onGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: callback() } });
-    if (error) set({ notice: `${error.message}. Use your email and a password for now.` });
+    if (error) set({ notice: isNetworkError(error) ? UNREACHABLE : `${authMessage(error)}. Use your email and a password for now.` });
   };
 
   const field = (borderErr: string) => ({ background: '#FFFFFF', border: `1px solid ${borderErr ? '#B42318' : '#E2E2DF'}`, borderRadius: '6px' });

@@ -50,11 +50,19 @@ Create the two env files from the examples:
 
 ```bash
 cp apps/web/.env.example apps/web/.env.local   # NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
-cp apps/api/.env.example apps/api/.env         # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+cp apps/api/.env.example apps/api/.env         # FREMWORK_SUPABASE_URL, FREMWORK_SUPABASE_SECRET_KEY
 ```
 
 ```bash
 pnpm dev          # web on :3000, API on :4000
+```
+
+### Checks
+
+```bash
+pnpm typecheck
+pnpm test         # unit tests + database/RLS tests (in-process Postgres, no Supabase needed)
+pnpm build
 ```
 
 ### Make yourself the owner
@@ -77,7 +85,7 @@ From then on, invite teammates from Admin › Settings › Team. Invite emails s
   - Providers: turn on Google and add its client ID. Locally, set them in `supabase/config.toml`.
 - **API on Vercel** (a second Vercel project from the same repo):
   1. Vercel → Add New → Project → import `fremwork.com` again. Set **Root Directory** to `apps/api`. Vercel detects NestJS.
-  2. Environment variables: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `WEB_URL` = your site's URL(s), e.g. `https://fremwork.com,https://fremwork-com.vercel.app`. Optional: `ALLOW_VERCEL_PREVIEWS=true`.
+  2. Environment variables: `FREMWORK_SUPABASE_URL`, `FREMWORK_SUPABASE_SECRET_KEY` (server only), and `WEB_URL` = your site's URL(s), e.g. `https://fremwork.com,https://fremwork-com.vercel.app`. For email: `RESEND_API_KEY`, `EMAIL_FROM`. Optional: `ALLOW_VERCEL_PREVIEWS=true` (off unless exactly `true`). Full list: `.env.example`; step-by-step: `docs/PRODUCTION_DEPLOYMENT.md`.
   3. Deploy, then open `https://<api-domain>/health`. It should return `{"ok":true}`.
   Other hosts (Render, Railway, Fly) work too: build with `npm run build`, start with `node dist/main.js`.
 - **Web on Vercel**: Root Directory `apps/web`. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL` (the site's URL) and `NEXT_PUBLIC_API_URL` (the API's URL from step 3). `NEXT_PUBLIC_*` values are baked in at build time, so **redeploy the web project after changing them**.

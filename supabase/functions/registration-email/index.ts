@@ -50,6 +50,14 @@ Deno.serve(async (req) => {
   const apiKey = env('RESEND_API_KEY');
   if (!apiKey) return json({ skipped: 'RESEND_API_KEY is not set' });
 
+  // The website API may send this confirmation too. Claim it atomically so only one side sends.
+  const claimed = await rest(`event_registrations?id=eq.${reg.id}&confirmation_sent_at=is.null`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({ confirmation_sent_at: new Date().toISOString() }),
+  });
+  if (!Array.isArray(claimed) || !claimed.length) return json({ skipped: 'already sent' });
+
   const input = {
     name: reg.name,
     event: reg.events,
@@ -61,7 +69,7 @@ Deno.serve(async (req) => {
 
   const send = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'Idempotency-Key': `registration-fn-${reg.id}` },
     body: JSON.stringify({
       from: env('EMAIL_FROM', 'Fremwork <events@fremwork.com>'),
       to: [reg.email],
@@ -73,12 +81,12 @@ Deno.serve(async (req) => {
   const result = await send.json().catch(() => ({}));
   if (!send.ok) {
     console.error('Resend error', send.status, result);
-    await rest(`event_registrations?id=eq.${reg.id}`, { method: 'PATCH', body: JSON.stringify({ confirmation_error: `${send.status}: ${result?.message ?? 'send failed'}` }) });
+    await rest(`event_registrations?id=eq.${reg.id}`, { method: 'PATCH', body: JSON.stringify({ confirmation_sent_at: null, confirmation_error: `${send.status}: ${result?.message ?? 'send failed'}` }) });
     return json({ error: result?.message ?? 'send failed' }, 502);
   }
   await rest(`event_registrations?id=eq.${reg.id}`, {
     method: 'PATCH',
-    body: JSON.stringify({ confirmation_sent_at: new Date().toISOString(), confirmation_error: null }),
+    body: JSON.stringify({ confirmation_error: null }),
   });
   return json({ sent: true, id: result?.id });
 });

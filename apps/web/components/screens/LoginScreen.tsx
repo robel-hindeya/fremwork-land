@@ -10,6 +10,7 @@ import { useFram } from '@/components/fram/useFram';
 import { useMergeState } from '@/components/fram/useMergeState';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { EMAIL_RE } from '@/lib/format';
+import { authMessage, isNetworkError, UNREACHABLE } from '@/lib/auth-errors';
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 const nextParam = () => {
@@ -48,6 +49,7 @@ export function LoginScreen() {
     set({ loading: true, notice: '' });
     const { error } = await supabase.auth.signInWithPassword({ email: em, password: pw });
     if (error) {
+      if (isNetworkError(error)) return set({ loading: false, notice: UNREACHABLE });
       return set({ loading: false, passErr: error.message === 'Invalid login credentials' ? 'That email and password do not match.' : error.message });
     }
     router.replace(nextParam() ?? '/open-app');
@@ -58,7 +60,9 @@ export function LoginScreen() {
     e.preventDefault();
     const em = get().email.trim();
     if (!em || !EMAIL_RE.test(em)) return set({ notice: 'Enter your email above and we will send you a reset link.' });
-    await supabase.auth.resetPasswordForEmail(em, { redirectTo: `${siteUrl()}/auth/callback?next=/set-password` });
+    const { error } = await supabase.auth.resetPasswordForEmail(em, { redirectTo: `${siteUrl()}/auth/callback?next=/set-password` });
+    // Only a network failure is reported: other answers must not reveal whether the account exists.
+    if (isNetworkError(error)) return set({ notice: UNREACHABLE });
     set({ notice: `If ${em} has an account, a reset link is on its way.` });
   };
 
@@ -68,7 +72,7 @@ export function LoginScreen() {
       provider,
       options: { redirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent(next)}` },
     });
-    if (error) set({ notice: `${error.message}. Use your email and password for now.` });
+    if (error) set({ notice: isNetworkError(error) ? UNREACHABLE : `${authMessage(error)}. Use your email and password for now.` });
   };
 
   const onReset = async () => {

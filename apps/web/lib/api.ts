@@ -20,7 +20,7 @@ type Options = Omit<RequestInit, 'body'> & { body?: unknown; auth?: boolean; fal
  */
 export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   const method = (opts.method || 'GET').toUpperCase();
-  if (API_DISABLED && opts.fallback === false) throw new ApiError(503, 'Email sending needs the website API. Configure NEXT_PUBLIC_API_URL and the email service.');
+  if (API_DISABLED && opts.fallback === false) throw new ApiError(503, 'This needs the Fremwork API, which sends the emails. Set NEXT_PUBLIC_API_URL on the website.');
   if (API_DISABLED) return direct<T>(method, path, opts.body);
   try {
     return await viaApi<T>(path, opts);

@@ -3,11 +3,20 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/** Escapes text before it goes into the HTML template, so names cannot inject markup or links. */
+export const escapeHtml = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+/** Provider calls never hang a serverless request. */
+const PROVIDER_TIMEOUT_MS = 8000;
+
 export interface SendRegistrationOptions {
   to: string;
   name: string;
   dates?: string;
   title?: string;
+  /** Resend de-duplicates retries that reuse the same key. */
+  idempotencyKey?: string;
 }
 
 @Injectable()
@@ -60,7 +69,6 @@ export class EmailService {
       path.join(process.cwd(), 'src/templates/registration-email.html'),
       path.join(process.cwd(), 'apps/api/src/templates/registration-email.html'),
       path.join(process.cwd(), 'supabase/templates/registration-email.html'),
-      '/home/hammerspacecraft/Downloads/Telegram Desktop/fremwork-registration-email.html',
     ];
 
     for (const p of possiblePaths) {
@@ -94,17 +102,19 @@ export class EmailService {
     const dates = opts.dates || 'Upcoming';
 
     const html = template
-      .replace(/{{\s*participant_name\s*}}/g, participantName)
-      .replace(/{{\s*dates\s*}}/g, dates);
+      .replace(/{{\s*participant_name\s*}}/g, () => escapeHtml(participantName))
+      .replace(/{{\s*dates\s*}}/g, () => escapeHtml(dates));
 
     const text = `Welcome ${participantName},\n\nYou are registered for ${opts.title || 'the Fremwork 3-Day Vibe Coding Training'}.\nDates: ${dates}\nDaily time: 09:00–13:40 EAT\n\nGet ready before Day 1:\n- A laptop or desktop and a stable internet connection\n- An AI tool account of your choice and a GitHub account\n- One small project idea you care about\n\nSee you online,\nFremwork Team\nhttps://fremwork.com`;
 
     try {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
+        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
+          ...(opts.idempotencyKey ? { 'Idempotency-Key': opts.idempotencyKey } : {}),
         },
         body: JSON.stringify({
           from: this.getFromEmail(),
@@ -136,6 +146,7 @@ export class EmailService {
     try {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
+        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
