@@ -1,48 +1,22 @@
- 'use client';
+'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { SUPABASE_URL } from '@/lib/supabase/config';
+import { useEffect, useState } from 'react';
 import { workspaceUrl } from '@/lib/app-url';
-import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
-/** Move the session in a POST body, never in a URL, history entry, or referrer. */
+/**
+ * Sends the visitor to the Fremwork AI workspace's own sign-in page. Sessions are never handed
+ * from this site to the workspace: a page that auto-submits tokens to another domain is what
+ * phishing kits do, and Google Safe Browsing flagged the workspace for receiving them. The
+ * workspace signs users in itself (password, or Google via its own /auth/callback).
+ */
 export default function OpenAppPage() {
-  const started = useRef(false);
-  const [error, setError] = useState('');
+  const [target, setTarget] = useState('');
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    const supabase = getSupabaseBrowserClient();
-    void (async () => {
-      const target = new URL('/api/auth/session', workspaceUrl());
-      if (target.protocol !== 'https:' && !(target.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(target.hostname))) {
-        throw new Error('The workspace URL is not configured securely.');
-      }
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return window.location.replace('/login');
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return window.location.replace('/login');
-      supabase.auth.stopAutoRefresh();
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = target.href;
-      for (const [name, value] of Object.entries({ access_token: session.access_token, refresh_token: session.refresh_token })) {
-        const input = document.createElement('input');
-        input.type = 'hidden'; input.name = name; input.value = value;
-        form.appendChild(input);
-      }
-      document.body.appendChild(form);
-      // Forget this site's copy without revoking the session being transferred.
-      // Restrict deletion to this project's cookies, including SSR chunk suffixes.
-      const cookiePrefix = `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
-      document.cookie.split('; ').map((c) => c.split('=')[0])
-        .filter((name) => name === cookiePrefix || name.startsWith(cookiePrefix + '.'))
-        .forEach((name) => { document.cookie = `${name}=; Max-Age=0; path=/`; });
-      form.submit();
-    })().catch(() => setError('We could not open your workspace. Please log in again.'));
+    const url = new URL('/sign-in', workspaceUrl());
+    setTarget(url.href);
+    window.location.replace(url.href);
   }, []);
   return <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', fontFamily: "'Geist', system-ui, sans-serif" }}>
-    {error ? <p role="alert">{error} <Link href="/login">Log in</Link></p> : <p role="status">Opening Fremwork AI…</p>}
+    <p role="status">Opening Fremwork AI… {target && <a href={target}>Continue</a>}</p>
   </div>;
 }
